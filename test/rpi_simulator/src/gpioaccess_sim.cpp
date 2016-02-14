@@ -39,7 +39,7 @@ boardNo(0)
 
 				PortInfoS* portInfoPtr = (PortInfoS*)areaInfo.areaAddress;
 
-				if(boardNo == 0)
+				if(boardNo == 0) //First instance resets all data
 				{
 					portInfoPtr->connectedToStruct.connectedTo = i;
 					portInfoPtr->connectedToStruct.boardNo = boardNoIndex;
@@ -92,15 +92,13 @@ int GPIOAccessSim::setPortDirection(const unsigned int portNo, const GPIODirecti
 
 int GPIOAccessSim::setPortValue(const unsigned int portNo, const unsigned int value)
 {
-
 	PortInfoS* portStructPtr = portNoToPortInfoMap.find(portNo)->second;
 
 	portStructPtr->portValue = value;
 
 	if(portStructPtr->connectedToStruct.connectedTo != portNo)
 	{
-		uint8_t otherPortNo = portStructPtr->connectedToStruct.connectedTo +
-							  portStructPtr->connectedToStruct.boardNo;
+		uint8_t otherPortNo = portStructPtr->connectedToStruct.connectedTo;
 
 		PortInfoS* connectedPortStructPtr = portNoToPortInfoMap.find(otherPortNo)->second;
 		connectedPortStructPtr->portValue = portStructPtr->portValue;
@@ -120,14 +118,13 @@ int GPIOAccessSim::getPortValue(const unsigned int portNo)
 
 bool GPIOAccessSim::GPIOAccessSim_connectPorts(const ConnectPortsInfoS& connectPortsInfo)
 {
-
 	PortInfoS* fromPortInfo = portNoToPortInfoMap.find(connectPortsInfo.fromPort)->second;
-	PortInfoS* toPortInfo = portNoToPortInfoMap.find(connectPortsInfo.toPort)->second;
+	PortInfoS* toPortInfo = portNoToPortInfoMap.find(connectPortsInfo.toPort + connectPortsInfo.toBoard)->second;
 
 	fromPortInfo->connectedToStruct.boardNo = connectPortsInfo.toBoard;
-	fromPortInfo->connectedToStruct.connectedTo = connectPortsInfo.toPort + connectPortsInfo.toBoard;
+	fromPortInfo->connectedToStruct.connectedTo = connectPortsInfo.toPort;
 	toPortInfo->connectedToStruct.boardNo = connectPortsInfo.fromBoard;
-	toPortInfo->connectedToStruct.connectedTo = connectPortsInfo.fromPort + connectPortsInfo.fromBoard;
+	toPortInfo->connectedToStruct.connectedTo = connectPortsInfo.fromPort;
 
 	toPortInfo->portValue = fromPortInfo->portValue;
 

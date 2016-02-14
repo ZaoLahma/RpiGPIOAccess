@@ -12,10 +12,11 @@ int main(void)
 
 	gpioAccess_1.exportPort(10);
 
+	//Connect port 7 on first board to port 10 on second board
 	ConnectPortsInfoS connectPortsInfo;
 	connectPortsInfo.fromBoard = 0;
 	connectPortsInfo.fromPort = 7;
-	connectPortsInfo.toBoard = 0;
+	connectPortsInfo.toBoard = 1;
 	connectPortsInfo.toPort = 10;
 
 	if(true != gpioAccess.GPIOAccessSim_connectPorts(connectPortsInfo))
@@ -27,11 +28,21 @@ int main(void)
 	gpioAccess.setPortDirection(7, GPIODirection::OUT);
 	gpioAccess_1.setPortDirection(10, GPIODirection::IN);
 
+	//By default the ports are set to 0. Verify that port 10
+	//on board 2 reads value 0.
+	if(0 != gpioAccess_1.getPortValue(10))
+	{
+		std::cout<<"Test verified data 0 NOK"<<std::endl;
+		return -1;
+	}
+
+	//Set port 7 on board 1 to 1.
 	gpioAccess.setPortValue(7, 1);
 
+	//Verify that port 10 on board 2 reads value 1
 	if(1 != gpioAccess_1.getPortValue(10))
 	{
-		std::cout<<"Test verified data NOK"<<std::endl;
+		std::cout<<"Test verified data 1 NOK"<<std::endl;
 		return -1;
 	}
 
